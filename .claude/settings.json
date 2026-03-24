@@ -1,0 +1,54 @@
+{
+  "permissions": {
+    "defaultMode": "ask",
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git log --oneline*)",
+      "Bash(ls*)",
+      "Bash(find*)",
+      "Bash(cat*)",
+      "Bash(head*)",
+      "Bash(tail*)",
+      "Bash(pwd)",
+      "Read(*)"
+    ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(sudo*)",
+      "Bash(curl * | sh)",
+      "Bash(wget * | sh)",
+      "Bash(git push*)",
+      "Bash(git reset --hard*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[food-video-template-lab] Проверяю Bash-команду перед выполнением...'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[food-video-template-lab] Изменения внесены. Проверь, не нарушены ли ограничения V1 и не создана ли лишняя сложность.'"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "PROJECT_NAME": "food-video-template-lab",
+    "PROJECT_STAGE": "bootstrap",
+    "PROJECT_LANGUAGE": "ru"
+  }
+}

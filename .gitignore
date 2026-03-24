@@ -1,0 +1,31 @@
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# secrets
+.env
+.env.*
+secrets/
+*.pem
+*.key
+
+# local Claude overrides
+.claude/settings.local.json
+
+# dependencies / builds
+node_modules/
+dist/
+build/
+.pytest_cache/
+.venv/
+__pycache__/
+
+# generated runs and artifacts
+runs/**
+!runs/.gitkeep
+fixtures/prepped-images/**
+!fixtures/prepped-images/.gitkeep
+fixtures/reference-outputs/**
+!fixtures/reference-outputs/.gitkeep

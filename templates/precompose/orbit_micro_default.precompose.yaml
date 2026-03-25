@@ -1,0 +1,80 @@
+# Precompose Spec: orbit_micro_default
+#
+# Template: orbit_micro_default
+# Motion: микро-орбитальное вращение камеры вокруг блюда
+# Status: proposed (Phase 3, ещё не валидирован на реальных runs)
+
+# --- Идентификация ---
+
+template_id: orbit_micro_default
+version: 1
+status: proposed
+
+# --- Defaults ---
+
+defaults:
+  safe_area_margin: "10%"       # % от меньшей стороны canvas
+  background_fill_strategy: source_bg
+  # background_fill_color: "#F5F5F5"  # не нужен при source_bg
+  dish_placement: center
+
+# --- Canvas specs per aspect_ratio ---
+
+canvas_specs:
+  - aspect_ratio: "1:1"
+    resolution: "1080x1080"
+    # safe_area_margin: наследуется из defaults (10%)
+    notes: >
+      Квадратный формат — наиболее стабильный для orbit.
+      Равные отступы со всех сторон, блюдо в центре.
+
+  - aspect_ratio: "9:16"
+    resolution: "1080x1920"
+    safe_area_margin: "12%"     # override: вертикальный формат,
+                                 # нужен чуть больший горизонтальный margin
+                                 # из-за orbital movement по горизонтали
+    notes: >
+      Вертикальный формат. Блюдо центрируется по обеим осям.
+      Увеличенный margin компенсирует горизонтальное смещение
+      при орбитальном вращении в узком горизонтальном пространстве.
+
+  - aspect_ratio: "16:9"
+    resolution: "1920x1080"
+    # safe_area_margin: наследуется из defaults (10%)
+    notes: >
+      Горизонтальный формат. Больше пространства по бокам от блюда.
+      При orbital движении вертикальные края менее критичны,
+      default margin достаточен.
+
+# --- Template-specific notes ---
+
+motion_considerations: >
+  Orbit micro создаёт малое вращательное движение камеры (5–15°).
+  Это означает, что блюдо визуально смещается к краям кадра
+  в момент вращения. Недостаточный margin приведёт к появлению
+  артефактов на краях или визуальной обрезке блюда.
+  Рекомендуется НЕ снижать margin ниже 8% для orbit-типа motion.
+
+angle_notes:
+  - angle_family: top_down
+    note: >
+      При top_down orbit выглядит как вращение вокруг вертикальной оси.
+      Все стороны кадра одинаково критичны. Равномерный margin важен.
+
+  - angle_family: three_quarter
+    note: >
+      three_quarter — основной ракурс для orbit.
+      Вращение создаёт ощущение «обхода» блюда.
+      Нижняя часть кадра чуть более критична (основание блюда).
+
+  - angle_family: hero_side
+    note: >
+      При hero_side orbit может подчёркивать высоту блюда.
+      Блюда с высокой вертикальной структурой (бургеры, стопки)
+      требуют внимания к верхнему margin.
+
+general_notes: >
+  Для orbit_micro critical factor — равномерность отступов.
+  При source_bg: рекомендуется проверить однотонность фона
+  перед precompose (визуально). Если фон неоднороден —
+  использовать solid_color с ручным подбором цвета.

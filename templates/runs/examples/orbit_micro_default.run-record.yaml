@@ -1,0 +1,99 @@
+# Run Record: orbit_micro_default — пример формата
+#
+# Это ПРИМЕР run record, не реальный результат.
+# Демонстрирует структуру и заполнение всех секций.
+# Данные вымышлены для иллюстрации формата.
+#
+# Status: format example (Phase 2, batch 3)
+
+# --- Идентификация ---
+
+run_id: run_orbit_micro_default_20260325_001
+template_id: orbit_micro_default
+template_version: 1
+prompt_pack_id: pp_orbit_micro_default
+prompt_pack_version: 1
+test_suite_id: ts_orbit_micro_default
+case_id: tc_01
+
+# --- Входные параметры ---
+
+source_image_ref: "fixture:plate_pasta_three_quarter"
+angle_family: three_quarter
+aspect_ratio: "1:1"
+duration: 5
+
+# --- Собранный prompt ---
+
+assembled_prompt: >
+  Subtle smooth slow orbital camera rotation around the food dish,
+  approximately 10 degrees of arc. The dish stays centered in frame.
+  Minimal movement, emphasizing volume and texture of the food.
+  Stable consistent background throughout,
+  three-quarter elevated angle, orbiting around the dish
+
+negative_prompt: >
+  morphing, deformation, melting, shape change, new objects appearing,
+  hands, people, utensils appearing, background change, color shift,
+  fast movement, jerky motion, zoom, camera shake, blurry
+
+# --- Precompose ---
+
+start_frame_ref: "fixtures/prepped-images/plate_pasta_three_quarter_1x1.png"
+precompose_notes: "Стандартный precompose, отклонений от rules нет"
+
+# --- API ---
+
+api_provider: kie_ai
+api_model: kling_3.0
+api_mode: pro
+api_task_id: "task_abc123def456"
+api_submitted_at: "2026-03-25T10:30:00Z"
+api_completed_at: "2026-03-25T10:33:42Z"
+api_error: null
+
+# --- Output ---
+
+generation_status: success
+video_url: "https://api.example.com/videos/task_abc123def456.mp4"
+video_file_path: "runs/orbit_micro_default/run_orbit_micro_default_20260325_001/output.mp4"
+thumbnail_path: "runs/orbit_micro_default/run_orbit_micro_default_20260325_001/thumb.jpg"
+duration_actual: 5.04
+resolution: "1080x1080"
+file_size_bytes: 4823040
+
+# --- Score ---
+
+score:
+  evaluator: human
+  criteria_results:
+    - criterion_id: dish_integrity
+      score: 5
+      notes: "Форма блюда полностью сохранена, деталировка стабильна"
+
+    - criterion_id: motion_stability
+      score: 4
+      notes: "Плавное движение, минимальный дрожь в последней секунде"
+
+    - criterion_id: motion_intent_match
+      score: 4
+      notes: "Орбитальное вращение ~8°, чуть меньше заявленных 10°, но intent выполнен"
+
+    - criterion_id: background_stability
+      score: 5
+      notes: "Фон стабилен, без изменений"
+
+    - criterion_id: no_artifacts
+      score: 4
+      notes: "Лёгкое размытие на краю тарелки в кадрах 3.0–3.5с, не критично"
+
+  overall_verdict: pass  # см. scoring-rubric-v1.md для правил определения verdict
+  score_notes: >
+    Хороший результат. Orbit читается, блюдо стабильно.
+    Минорные замечания по motion_stability и edge blur не влияют на production-пригодность.
+  scored_at: "2026-03-25T14:15:00Z"
+
+# --- Timestamps ---
+
+created_at: "2026-03-25T10:30:00Z"
+updated_at: "2026-03-25T14:15:00Z"

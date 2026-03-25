@@ -86,6 +86,15 @@
 - спорные архитектурные решения вынесены в ADR;
 - проект готов к разработке template schema.
 
+### Статус
+
+**Завершена ✓** (2026-03-25)
+
+Артефакты:
+- `docs/adr/ADR-0002-v1-scope.md`
+- `docs/domain-model.md`
+- `docs/adr/ADR-0003-template-first-architecture.md`
+
 ---
 
 ## Фаза 2 — Template schema и prompt-pack foundation
@@ -342,14 +351,14 @@
 ## Текущий статус
 
 ### Текущая активная фаза
-**Phase 1 — Project framing**
+**Phase 2 — Template schema и prompt-pack foundation**
 
 ### Ближайшие шаги
 
-- создать `docs/adr/ADR-0002-v1-scope.md` — canonical source of truth для V1 scope;
-- создать `docs/domain-model.md` — определить 9 сущностей проекта;
-- создать `docs/adr/ADR-0003-template-first-architecture.md` — template-first архитектура;
-- обновить этот документ по завершении всех артефактов Фазы 1.
+- определить структуру template schema;
+- определить формат prompt packs;
+- описать первые 1–2 шаблона в schema-формате;
+- определить стратегию версионирования template и prompt_pack.
 
 ---
 

@@ -164,16 +164,11 @@ Claude Code не должен:
 
 Текущий ближайший этап проекта:
 
-1. завершить bootstrap репозитория;
-2. зафиксировать базовые проектные правила;
-3. подготовить стартовый набор документов;
-4. сделать первый контролируемый commit;
-5. только после этого переходить к:
-   - template schema;
-   - prompt pack format;
-   - testing / scoring design;
-   - adapter planning.
+1. определить структуру template schema;
+2. определить формат prompt packs;
+3. описать первые 1–2 шаблона в schema-формате;
+4. определить стратегию версионирования template и prompt_pack.
 
 ## Текущий статус
 
-**Статус:** bootstrap in progress
+**Статус:** Phase 2 — Template schema и prompt-pack foundation in progress

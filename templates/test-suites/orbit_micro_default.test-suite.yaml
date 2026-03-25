@@ -1,0 +1,118 @@
+# Test Suite: orbit_micro_default
+#
+# Template: orbit_micro_default
+# Назначение: стартовый набор тестов для валидации orbit_micro
+# Status: proposed (Phase 2, fixture images ещё не добавлены)
+
+test_suite_id: ts_orbit_micro_default
+template_id: orbit_micro_default
+version: 1
+
+# --- Scoring criteria ---
+
+scoring_criteria:
+  - criterion_id: dish_integrity
+    name: "Сохранность формы блюда"
+    description: "Блюдо сохраняет форму, пропорции и детали на протяжении всего видео"
+    weight: critical
+
+  - criterion_id: motion_stability
+    name: "Стабильность движения"
+    description: "Орбитальное движение плавное, без рывков и скачков"
+    weight: critical
+
+  - criterion_id: motion_intent_match
+    name: "Соответствие motion intent"
+    description: "Движение — орбитальное вращение ~10°, а не zoom, pan или статика"
+    weight: high
+
+  - criterion_id: background_stability
+    name: "Чистота фона"
+    description: "Фон однотонный, без новых объектов, теней или текстур"
+    weight: high
+
+  - criterion_id: no_artifacts
+    name: "Отсутствие артефактов"
+    description: "Нет визуальных глитчей, размытий, дублирования элементов блюда"
+    weight: normal
+
+min_pass_rate: 0.7  # proposed: 70% runs должны получить verdict=pass
+
+# --- Test cases ---
+#
+# Стратегия покрытия:
+# - Все 3 supported_angles (top_down, three_quarter, hero_side)
+# - Все 3 supported_aspect_ratios (1:1, 9:16, 16:9)
+# - Обе supported_durations (5, 10)
+# - Два типа блюд: плоское (pasta) и объёмное (burger)
+# - 8 кейсов = representative subset, не полный cartesian product (36 комбинаций)
+
+test_cases:
+  # --- three_quarter angle (основной ракурс для orbit) ---
+  - case_id: tc_01
+    source_image_ref: "fixture:plate_pasta_three_quarter"
+    angle_family: three_quarter
+    aspect_ratio: "1:1"
+    duration: 5
+    notes: "Базовый кейс: самый безопасный ракурс + квадрат + короткая длительность"
+
+  - case_id: tc_02
+    source_image_ref: "fixture:plate_pasta_three_quarter"
+    angle_family: three_quarter
+    aspect_ratio: "9:16"
+    duration: 10
+    notes: "Вертикальный формат + длинная длительность — проверка стабильности"
+
+  - case_id: tc_03
+    source_image_ref: "fixture:burger_three_quarter"
+    angle_family: three_quarter
+    aspect_ratio: "16:9"
+    duration: 5
+    notes: "Объёмное блюдо + горизонтальный формат — проверка dish_integrity"
+
+  # --- top_down angle (потенциально проблемный для orbit) ---
+  - case_id: tc_04
+    source_image_ref: "fixture:plate_pasta_top_down"
+    angle_family: top_down
+    aspect_ratio: "1:1"
+    duration: 5
+    notes: "Top-down orbit может выглядеть как rotation — ключевой exploratory кейс"
+
+  - case_id: tc_05
+    source_image_ref: "fixture:plate_pasta_top_down"
+    angle_family: top_down
+    aspect_ratio: "9:16"
+    duration: 10
+    notes: "Top-down + vertical + длинная длительность — stress test"
+
+  # --- hero_side angle ---
+  - case_id: tc_06
+    source_image_ref: "fixture:burger_hero_side"
+    angle_family: hero_side
+    aspect_ratio: "1:1"
+    duration: 5
+    notes: "Объёмное блюдо сбоку — проверка dish_integrity при боковом orbit"
+
+  - case_id: tc_07
+    source_image_ref: "fixture:burger_hero_side"
+    angle_family: hero_side
+    aspect_ratio: "16:9"
+    duration: 10
+    notes: "Широкий формат сбоку + длинная длительность"
+
+  # --- edge case ---
+  - case_id: tc_08
+    source_image_ref: "fixture:salad_bowl_three_quarter"
+    angle_family: three_quarter
+    aspect_ratio: "1:1"
+    duration: 10
+    notes: "Блюдо с мелкими деталями (листья, зелень) — проверка сохранности текстур"
+
+notes: >
+  Стартовый test suite для Phase 6.
+  Fixture images ещё не добавлены — source_image_ref содержит placeholder-ы.
+  После добавления fixture-ов в Phase 3 нужно обновить references.
+  Полная scoring rubric (шкалы, пороги, метод оценки) определяется в Phase 5.
+
+created_at: "2026-03-25"
+updated_at: "2026-03-25"

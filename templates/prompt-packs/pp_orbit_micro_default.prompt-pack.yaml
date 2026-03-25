@@ -1,0 +1,68 @@
+# Prompt Pack: pp_orbit_micro_default
+#
+# Template: orbit_micro_default
+# Назначение: prompt-конфигурация для микро-орбитального вращения
+# Status: proposed (Phase 2, ещё не тестировался с Kling 3.0)
+
+prompt_pack_id: pp_orbit_micro_default
+template_id: orbit_micro_default
+version: 1
+
+# --- Основной prompt ---
+
+motion_prompt: >
+  Subtle smooth slow orbital camera rotation around the food dish,
+  approximately 10 degrees of arc. The dish stays centered in frame.
+  Minimal movement, emphasizing volume and texture of the food.
+  Stable consistent background throughout.
+
+negative_prompt: >
+  morphing, deformation, melting, shape change, new objects appearing,
+  hands, people, utensils appearing, background change, color shift,
+  fast movement, jerky motion, zoom, camera shake, blurry
+
+# --- Модификаторы ---
+
+prompt_modifiers:
+  by_angle:
+    top_down:
+      append: "top-down overhead view, rotating around the vertical axis"
+    three_quarter:
+      append: "three-quarter elevated angle, orbiting around the dish"
+    hero_side:
+      append: "low side angle, slow lateral arc around the dish"
+  by_aspect_ratio:
+    "1:1":
+      append: ""
+    "9:16":
+      append: "vertical portrait composition, dish centered"
+    "16:9":
+      append: "wide horizontal composition, dish centered"
+
+# --- Стабильность ---
+
+safe_patterns:
+  - "subtle smooth slow orbital"
+  - "dish stays centered"
+  - "stable consistent background"
+  - "approximately 10 degrees"
+
+unsafe_patterns:
+  - "dramatic rotation"
+  - "spin"
+  - "360 degree"
+  - "fast orbit"
+  - "dynamic camera"
+  - "cinematic sweep"
+
+stability_notes: >
+  Ключевые наблюдения (гипотезы, подлежат валидации в Phase 6):
+  - Слово "subtle" стабилизирует амплитуду движения.
+  - Указание градусов ("10 degrees") помогает ограничить scope движения.
+  - "Stable background" в motion_prompt дублирует negative_prompt,
+    но может усиливать стабильность результата.
+  - Negative prompt намеренно длинный — перечисляет конкретные нежелательные
+    эффекты вместо общих формулировок.
+
+created_at: "2026-03-25"
+updated_at: "2026-03-25"

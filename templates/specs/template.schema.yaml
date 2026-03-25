@@ -1,0 +1,181 @@
+# Template Schema — food-video-template-lab
+#
+# Версия схемы: 0.1.0 (proposed)
+# Canonical sources: ADR-0002, ADR-0003, domain-model.md
+#
+# Этот файл определяет структуру template spec для V1.
+# Каждый template описывается отдельным YAML-файлом в templates/specs/.
+# Имя файла: {template_id}.template.yaml
+
+# --- Идентификация ---
+
+template_id:
+  type: string
+  required: true
+  description: >
+    Уникальный идентификатор шаблона.
+    Формат: {family_id}_{variant} (например orbit_micro_default).
+    Стабилен между версиями.
+  example: "orbit_micro_default"
+
+family_id:
+  type: string
+  required: true
+  description: >
+    Ссылка на template_family.
+    V1 values: orbit_micro, dolly_in_clean, float_parallax, light_accent.
+  enum:
+    - orbit_micro
+    - dolly_in_clean
+    - float_parallax
+    - light_accent
+
+version:
+  type: integer
+  required: true
+  description: >
+    Версия шаблона. Начинается с 1.
+    Инкрементируется при изменении параметров template spec.
+    Изменение связанного prompt_pack может требовать bump version,
+    если оно влияет на template как единицу тестирования.
+    Окончательная versioning policy определяется отдельно.
+  minimum: 1
+
+status:
+  type: string
+  required: true
+  description: >
+    Текущий статус жизненного цикла.
+    Полная проработка статусной модели — Phase 7.
+  enum:
+    - draft
+    - in_test
+    - unstable
+    - needs_revision
+    - candidate
+    - approved
+    - archived
+  default: draft
+
+# --- Параметры генерации ---
+
+supported_angles:
+  type: list[string]
+  required: true
+  description: >
+    Подмножество family.compatible_angles, подтверждённое для данного template.
+    Инвариант: supported_angles ⊆ family.compatible_angles (И-2, ADR-0003).
+  allowed_values:
+    - top_down
+    - three_quarter
+    - hero_side
+
+supported_aspect_ratios:
+  type: list[string]
+  required: true
+  description: >
+    Допустимые соотношения сторон. V1 фиксирует ровно 3 варианта (ADR-0002, п.10).
+  allowed_values:
+    - "1:1"
+    - "9:16"
+    - "16:9"
+
+supported_durations:
+  type: list[number]
+  required: true
+  description: >
+    Подтверждённые длительности в секундах.
+    V1 policy range: 5–15s (ADR-0002, п.11).
+    Template не обязан поддерживать весь range.
+    Значения подтверждаются test runs.
+  constraints:
+    min_value: 5
+    max_value: 15
+
+# --- Motion intent ---
+
+motion_intent:
+  type: string
+  required: true
+  description: >
+    Текстовое описание ожидаемого движения на человеческом языке.
+    Определяет «что должно происходить в видео» — без привязки к prompt-формулировкам.
+    Служит для коммуникации между людьми и для оценки результата.
+
+# --- Prompt pack ---
+
+prompt_pack_id:
+  type: string
+  required: true
+  description: >
+    Ссылка на связанный prompt_pack.
+    Инвариант V1: template ↔ prompt_pack = 1:1 (ADR-0002, п.13).
+    Файл prompt pack: templates/prompt-packs/{prompt_pack_id}.prompt-pack.yaml
+
+# --- Precompose ---
+
+precompose_rules:
+  type: object
+  required: true
+  description: >
+    Правила подготовки start frame. Детальная спецификация — Phase 3.
+    В Phase 2 фиксируется только структура.
+  fields:
+    aspect_ratio_strategy:
+      type: string
+      required: true
+      description: >
+        Стратегия приведения к целевому aspect_ratio.
+        V1: только precompose (ADR-0002, п.12).
+      enum:
+        - precompose  # V1: единственный вариант
+    safe_area_margin:
+      type: string
+      required: false
+      description: >
+        Минимальный отступ блюда от края кадра.
+        Точный формат (px, %, ratio) определяется в Phase 3.
+        Proposed: percentage notation (e.g. "10%").
+    background_fill:
+      type: string
+      required: false
+      description: >
+        Стратегия заполнения фона при precompose.
+        Proposed values: source_bg, solid_color.
+        Детали — Phase 3.
+    notes:
+      type: string
+      required: false
+      description: >
+        Свободные заметки по precompose-специфике данного template.
+
+# --- Ограничения и метаданные ---
+
+known_limitations:
+  type: list[string]
+  required: false
+  description: >
+    Известные ограничения данного template.
+    Пополняется по результатам тестирования.
+
+scoring_hints:
+  type: list[string]
+  required: false
+  description: >
+    Подсказки для scoring: на что обращать внимание при оценке runs
+    этого template. Полная scoring rubric — Phase 5.
+    Здесь только template-specific акценты.
+
+tags:
+  type: list[string]
+  required: false
+  description: >
+    Свободные теги для классификации и фильтрации.
+
+created_at:
+  type: string  # ISO 8601 date
+  required: true
+
+updated_at:
+  type: string  # ISO 8601 date
+  required: true

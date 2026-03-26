@@ -1,0 +1,65 @@
+{
+  "_comment": "Example normalized task record: orbit_micro_default, tc_01",
+  "_status": "proposed (Phase 4, batch 2) — illustrative, not from real API call",
+  "_note": "Task record captures the API-layer lifecycle for a single run. In V1, this data is embedded in the run record (api_* and output sections). This file demonstrates the normalized shape only.",
+
+  "_run_context": {
+    "run_id": "run_orbit_micro_default_20260325_001",
+    "template_id": "orbit_micro_default",
+    "test_case": "tc_01 — plate_pasta, three_quarter, 1:1, 5s",
+    "run_record_ref": "runs/orbit_micro_default/run_orbit_micro_default_20260325_001.run-record.yaml"
+  },
+
+  "task_id": "task_abc123def456",
+  "run_record_ref": "run_orbit_micro_default_20260325_001",
+
+  "status": "success",
+  "result_source": "callback",
+
+  "submitted_at": "2026-03-25T10:30:00Z",
+  "completed_at": "2026-03-25T10:33:42Z",
+
+  "video_url": "https://cdn.kieai.com/videos/task_abc123def456.mp4",
+  "duration_actual": 5.04,
+  "resolution": "1080x1080",
+  "provider_error": null,
+  "internal_error": null,
+
+  "_provider_raw_on_submit": {
+    "_note": "Raw provider response at task creation (task creation response)",
+    "task_id": "task_abc123def456",
+    "status": "pending"
+  },
+
+  "_provider_raw_on_complete": {
+    "_note": "Raw provider response at terminal state (received via callback payload)",
+    "task_id": "task_abc123def456",
+    "status": "completed",
+    "video_url": "https://cdn.kieai.com/videos/task_abc123def456.mp4",
+    "duration_actual": 5.04,
+    "resolution": "1080x1080",
+    "error_message": null
+  },
+
+  "_status_transitions": [
+    {
+      "timestamp": "2026-03-25T10:30:00Z",
+      "provider_status": "pending",
+      "internal_status": "pending",
+      "source": "submit_response"
+    },
+    {
+      "timestamp": "2026-03-25T10:33:42Z",
+      "provider_status": "completed",
+      "internal_status": "success",
+      "source": "callback"
+    }
+  ],
+
+  "_v1_notes": {
+    "result_source": "callback — preferred for production. polling used for dev/manual workflow.",
+    "task_record_in_v1": "In V1, these fields are embedded in the run record (api_* section + output section). A separate .task-record.json file is an illustrative example artifact only.",
+    "video_url_ttl": "TTL of CDN video_url is unknown — verify with Kie AI. Download video promptly after success.",
+    "status_mapping_ref": "templates/adapters/task-status-mapping.md"
+  }
+}

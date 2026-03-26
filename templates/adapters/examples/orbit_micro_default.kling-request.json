@@ -1,0 +1,80 @@
+{
+  "_comment": "Example Kling API request: orbit_micro_default, tc_01",
+  "_status": "proposed (Phase 4, batch 1) — illustrative, not validated on real API",
+  "_api_note": "Field names, model_name, aspect_ratio format, and endpoint paths must be verified against current Kie AI documentation before first real run",
+
+  "_template_context": {
+    "template_id": "orbit_micro_default",
+    "template_version": 1,
+    "prompt_pack_id": "pp_orbit_micro_default",
+    "prompt_pack_version": 1,
+    "test_suite_id": "ts_orbit_micro_default",
+    "test_case": "tc_01 — plate_pasta, three_quarter, 1:1, 5s"
+  },
+
+  "_prompt_assembly_trace": {
+    "base": "Subtle smooth slow orbital camera rotation around the food dish, approximately 10 degrees of arc. The dish stays centered in frame. Minimal movement, emphasizing volume and texture of the food. Stable consistent background throughout.",
+    "angle_modifier": "three-quarter elevated angle, orbiting around the dish",
+    "aspect_ratio_modifier": "",
+    "rule": "base + ', ' + angle_modifier (aspect_ratio modifier empty for 1:1, skipped)",
+    "result": "Subtle smooth slow orbital camera rotation around the food dish, approximately 10 degrees of arc. The dish stays centered in frame. Minimal movement, emphasizing volume and texture of the food. Stable consistent background throughout, three-quarter elevated angle, orbiting around the dish"
+  },
+
+  "_precompose_trace": {
+    "source_image_ref": "fixtures/raw-inputs/plate_pasta_three_quarter.png",
+    "precompose_spec": "templates/precompose/orbit_micro_default.precompose.yaml",
+    "canvas": "1080x1080",
+    "safe_area_margin": "10%",
+    "background_fill": "source_bg",
+    "output_file": "fixtures/prepped-images/plate_pasta_three_quarter_1x1.png",
+    "image_url_note": "image_url obtained via upstream upload workflow (TBD); placeholder used here for illustration"
+  },
+
+  "request": {
+    "model_name": "kling-3.0",
+    "image_urls": [
+      "https://<image-host>/prepped-images/plate_pasta_three_quarter_1x1.png"
+    ],
+    "prompt": "Subtle smooth slow orbital camera rotation around the food dish, approximately 10 degrees of arc. The dish stays centered in frame. Minimal movement, emphasizing volume and texture of the food. Stable consistent background throughout, three-quarter elevated angle, orbiting around the dish",
+    "negative_prompt": "morphing, deformation, melting, shape change, new objects appearing, hands, people, utensils appearing, background change, color shift, fast movement, jerky motion, zoom, camera shake, blurry",
+    "duration": "5",
+    "mode": "pro",
+    "aspect_ratio": "1:1",
+    "callback_url": "https://<your-endpoint>/webhooks/kling-result"
+  },
+
+  "_request_headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <KIEAI_API_TOKEN>"
+  },
+
+  "_v1_fixed_params": {
+    "mode": "pro — ADR-0002, п. 9",
+    "model_name": "kling-3.0 — proposed, verify against current Kie docs",
+    "end_frame": "not sent — start frame only (ADR-0002, п. 9)",
+    "multi_shots": "not sent — single-shot only",
+    "camera_control": "not sent — controlled via prompt"
+  },
+
+  "_aspect_ratio_note": "aspect_ratio передаётся явно для deterministic output contract. Precompose обеспечивает framing/canvas, но не заменяет параметр (ADR-0005, А-3). Формат '1:1' — proposed, верифицировать по Kie docs.",
+
+  "_result_retrieval": {
+    "production_preferred": "callBackUrl receives POST when task completes",
+    "dev_manual_fallback": "poll GET /tasks/{task_id}, initial_delay 2-3s, exponential backoff, max 10min"
+  },
+
+  "_expected_response_on_submit": {
+    "task_id": "task_xxxxxxxxxxxxxxxx",
+    "status": "pending"
+  },
+
+  "_expected_response_on_complete": {
+    "task_id": "task_xxxxxxxxxxxxxxxx",
+    "status": "completed",
+    "video_url": "https://cdn.kieai.com/videos/task_xxxxxxxxxxxxxxxx.mp4",
+    "duration_actual": 5.04,
+    "resolution": "1080x1080"
+  },
+
+  "_run_record_ref": "runs/orbit_micro_default/run_orbit_micro_default_20260325_001.run-record.yaml"
+}

@@ -2,21 +2,18 @@
 
 ## Статус
 
-Proposed (Phase 4, batch 1)
+Proposed (Phase 4, batch 1) — частично обновлён по Kie AI docs (Phase 4 correction)
 
 ## Дата
 
-2026-03-25
+2026-03-26
 
 ## Назначение
 
 Определяет формат запроса к Kling 3.0 via Kie AI API для V1.
 
-> **Важно:** Этот документ описывает архитектурный request model.
-> Точные имена полей, допустимые значения и endpoint paths **должны сверяться
-> с актуальной официальной Kie AI документацией** перед первым реальным запросом.
-> Везде, где значение помечено _(proposed)_ — оно основано на официальных примерах
-> или community knowledge и требует верификации.
+> **Важно:** endpoint paths и request shape зафиксированы по официальной Kie AI документации.
+> Значения, помеченные _(proposed)_, требуют верификации первым smoke test (ADR-0006).
 
 Canonical sources: ADR-0002, ADR-0005, Run record format.
 
@@ -32,28 +29,69 @@ Canonical sources: ADR-0002, ADR-0005, Run record format.
 
 ---
 
+## Endpoint
+
+```
+POST {kie_api_base_url}/api/v1/jobs/createTask
+Authorization: Bearer <KIEAI_API_TOKEN>
+Content-Type: application/json
+```
+
+---
+
+## Request Shape
+
+Request body использует nested структуру `model` + `input`:
+
+```json
+{
+  "model": "<model_identifier>",
+  "input": {
+    "image_url": "<start_frame_url>",
+    "prompt": "<assembled_prompt>",
+    "negative_prompt": "<negative_prompt>",
+    "duration": "<duration>",
+    "mode": "pro",
+    "aspect_ratio": "<aspect_ratio>"
+  }
+}
+```
+
+---
+
 ## Request Fields (V1)
 
-### Основные поля
+### Верхний уровень
 
-| API поле | Тип | V1 значение / источник | Описание |
-|----------|-----|----------------------|----------|
-| `model_name` | string | `"kling-3.0"` _(proposed)_ | Идентификатор модели. **Верифицировать по Kie docs** |
-| `image_urls` | array[string] | `[start_frame_url]` | URL precomposed start frame (1 элемент в V1) |
+| Поле | Тип | V1 значение / источник | Описание |
+|------|-----|----------------------|----------|
+| `model` | string | `"kling-3.0"` _(proposed — верифицировать по Kie docs)_ | Идентификатор модели |
+
+### Объект `input`
+
+| Поле | Тип | V1 значение / источник | Описание |
+|------|-----|----------------------|----------|
+| `image_url` | string | `start_frame_url` | URL precomposed start frame _(поле vs `image_urls` — верифицировать)_ |
 | `prompt` | string | assembled_prompt | Motion prompt с applied modifiers |
 | `negative_prompt` | string | prompt_pack.negative_prompt | Anti-drift guidance |
-| `duration` | string | `"5"` или `"10"` | Длительность, строковый формат _(proposed)_ |
+| `duration` | string | `"5"` или `"10"` | Длительность _(строка vs число — верифицировать)_ |
 | `mode` | string | `"pro"` (fixed) | Режим генерации |
-| `aspect_ratio` | string | run params | `"1:1"`, `"9:16"`, `"16:9"` _(proposed format)_ |
-| `callback_url` | string \| omitted | environment config | Webhook URL (production). Omit → polling mode |
+| `aspect_ratio` | string | run params | `"1:1"`, `"9:16"`, `"16:9"` _(формат — верифицировать)_ |
+
+### callBackUrl (polling mode = опустить)
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `callBackUrl` | string \| omitted | Webhook URL (production). Опустить → polling mode |
+
+> Точное название поля (`callBackUrl` vs `callback_url`) — верифицировать по docs.
 
 ### Поля, не используемые в V1
 
-| API поле | V1 поведение | Причина |
-|----------|-------------|---------|
-| `tail_image_urls` / end frame | не передаётся | V1: start frame only (ADR-0002, п. 9) |
-| `camera_control` | не передаётся | Управление камерой — через prompt |
-| `cfg_scale` | не передаётся (API default) | V1: полагаемся на default модели |
+| Поле | V1 поведение | Причина |
+|------|-------------|---------|
+| End frame / tail image | не передаётся | V1: start frame only (ADR-0002) |
+| `camera_control` | не передаётся | Управление через prompt |
 
 ---
 
@@ -63,21 +101,21 @@ Canonical sources: ADR-0002, ADR-0005, Run record format.
 template
   └── prompt_pack
         ├── motion_prompt ──────────────┐
-        ├── negative_prompt ─────────────┼──► API fields
+        ├── negative_prompt ─────────────┼──► input fields
         └── modifiers                    │
               ├── by_angle ──────────────┘
               └── by_ratio ──────────────┘
 
 precompose_input
-  └── file_path → (upstream upload) → URL ──► image_urls[0]
+  └── file_path → (upstream upload) → URL ──► input.image_url
 
 run params
-  ├── duration ────────────────────────────► duration
-  └── aspect_ratio ────────────────────────► aspect_ratio
+  ├── duration ────────────────────────────► input.duration
+  └── aspect_ratio ────────────────────────► input.aspect_ratio
 
 adapter config (fixed)
-  ├── model_name ──────────────────────────► model_name
-  └── mode ────────────────────────────────► mode
+  ├── model ───────────────────────────────► model
+  └── mode ────────────────────────────────► input.mode
 ```
 
 ### Prompt assembly (выполняется до вызова adapter)
@@ -88,19 +126,11 @@ assembled_prompt = motion_prompt
                  + ", " + by_aspect_ratio[aspect_ratio].append   (если непустой)
 ```
 
-Порядок: base → angle modifier → aspect_ratio modifier.
-
 ---
 
 ## Image delivery
 
-В Kling request изображение передаётся как **URL** через поле `image_urls`.
-Adapter не выполняет binary upload — он получает уже готовый URL.
-
-**Upstream workflow (TBD):**
-Перед вызовом adapter precomposed start frame должен быть доступен по URL.
-Как именно он туда попадает (upload в cloud storage, Kie upload endpoint, иное)
-— определяется отдельно, за рамками V1 adapter contract.
+Adapter получает готовый URL. Upstream upload workflow — TBD (за рамками V1 adapter contract).
 
 ---
 
@@ -114,25 +144,18 @@ Token хранится в env variable, не в коде.
 
 ---
 
-## Response Model
+## Response Model (при submission)
 
-### Task creation response
+При успешной отправке API возвращает `taskId` задачи.
+Точная структура submission response — верифицировать по docs.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `task_id` | string | Уникальный ID задачи |
-| `status` | string | Начальный статус |
+Ожидаемое (proposed):
+```json
+{ "taskId": "..." }
+```
 
-### Task status response / callBack payload
-
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `task_id` | string | ID задачи |
-| `status` | string | `pending`, `processing`, `completed`, `failed` |
-| `video_url` | string \| null | URL видео (при completed) |
-| `error_message` | string \| null | Описание ошибки (при failed) |
-
-> Точные имена полей response — proposed. Верифицировать по актуальной Kie AI документации.
+Результат задачи получается через `GET /api/v1/jobs/recordInfo?taskId={taskId}`.
+Детали response — см. `kling-response-format.md`.
 
 ---
 
@@ -140,14 +163,15 @@ Token хранится в env variable, не в коде.
 
 ```json
 {
-  "model_name": "kling-3.0",
-  "image_urls": ["https://<image-host>/prepped-images/plate_pasta_three_quarter_1x1.png"],
-  "prompt": "Subtle smooth slow orbital camera rotation around the food dish, approximately 10 degrees of arc. The dish stays centered in frame. Minimal movement, emphasizing volume and texture of the food. Stable consistent background throughout, three-quarter elevated angle, orbiting around the dish",
-  "negative_prompt": "morphing, deformation, melting, shape change, new objects appearing, hands, people, utensils appearing, background change, color shift, fast movement, jerky motion, zoom, camera shake, blurry",
-  "duration": "5",
-  "mode": "pro",
-  "aspect_ratio": "1:1",
-  "callback_url": "https://<your-endpoint>/webhooks/kling-result"
+  "model": "kling-3.0",
+  "input": {
+    "image_url": "https://<image-host>/prepped-images/plate_pasta_three_quarter_1x1.png",
+    "prompt": "Subtle smooth slow orbital camera rotation around the food dish, approximately 10 degrees of arc. The dish stays centered in frame. Minimal movement, emphasizing volume and texture of the food. Stable consistent background throughout, three-quarter elevated angle, orbiting around the dish",
+    "negative_prompt": "morphing, deformation, melting, shape change, new objects appearing, hands, people, utensils appearing, background change, color shift, fast movement, jerky motion, zoom, camera shake, blurry",
+    "duration": "5",
+    "mode": "pro",
+    "aspect_ratio": "1:1"
+  }
 }
 ```
 
@@ -159,8 +183,9 @@ Token хранится в env variable, не в коде.
 
 | # | Вопрос | Статус |
 |---|--------|--------|
-| 1 | Точный `model_name` для Kling 3.0 | Proposed: `kling-3.0`. Верифицировать по docs |
-| 2 | Формат `aspect_ratio` в API | Proposed: `"1:1"`, `"9:16"`, `"16:9"`. Верифицировать |
-| 3 | Upstream image upload workflow | Открыт — TBD |
-| 4 | `duration`: строка `"5"` или число `5`? | Proposed: строка. Из официального примера |
-| 5 | `cfg_scale` default — подходит ли для pro mode? | Опционально, Phase 6 |
+| 1 | Точный model identifier для Kling 3.0 | Proposed: `"kling-3.0"`. Верифицировать smoke test |
+| 2 | `image_url` vs `image_urls` внутри `input` | Proposed: `image_url`. Верифицировать smoke test |
+| 3 | `duration`: строка `"5"` или число `5` | Proposed: строка. Верифицировать smoke test |
+| 4 | Формат `aspect_ratio` | Proposed: `"1:1"`. Верифицировать smoke test |
+| 5 | Точное название поля для webhook: `callBackUrl` vs иное | Верифицировать по docs |
+| 6 | Upstream image upload workflow | Открыт — TBD |
